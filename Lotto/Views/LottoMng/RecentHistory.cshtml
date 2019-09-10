@@ -1,0 +1,164 @@
+﻿@using Microsoft.Ajax.Utilities
+@model IEnumerable<Lotto.Models.Lotto_History>
+@{
+    ViewBag.Title = "LottoTop";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    <h2>kkk</h2>
+
+    <body>
+
+        @using (Html.BeginForm("Index_Search", "RoleMNG", FormMethod.Post, new { id = "search-form" }))
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+
+                        <th>
+                            계정
+                        </th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div>
+                                <table>
+
+                                    <tr>
+
+                                        <td style="width: 300px; padding-right: 5px;">
+                                            @Html.TextBox("login_id", null, new { @class = "form-control" })
+                                        </td>
+
+                                        <td><input id="button" type="button" value="검색" class="btn btn-info" onclick="SearchForEmployees_Login()" /></td>
+
+                                    </tr>
+
+                                </table>
+
+                            </div>
+                        </td>
+                        
+                        
+                        
+                    </tr>
+                </tbody>
+            </table>
+        }
+
+
+        <div>
+            Top Numbers in Last 30 weeks
+        </div>
+
+        <table id="example-table-1" width="100%" class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+
+                    <th scope="Row">
+
+                        번호
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.num1)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.num2)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.num3)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.num4)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.num5)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.num6)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.bonus)
+                    </th>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = ViewBag.topNumber;
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @i
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num2)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num3)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num4)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num5)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num6)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.bonus)
+                        </td>
+                    </tr>
+                    i = i - 1;
+
+                }
+
+            </tbody>
+        </table>
+
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+                $("#example-table-1").DataTable({
+                    "order": [[0, "desc"]],
+                    "lengthMenu": [[30, 50, -1], [30, 50, "All"]]
+
+                });
+
+            });
+
+
+            $("#search-form").on("submit",
+            function(e) {
+                e.preventDefault();
+
+                    $.ajax({
+                        url: this.action,
+                        type: this.method,
+                        data: $(this).serialize(),
+                        beforeSend: function () {
+                           // $("#overlay").show();
+                        },
+                        success: function (result) {                            
+                            //$('#searchResults').html(result);
+                        }
+                    });
+            });
+
+        </script>
+    </body>
