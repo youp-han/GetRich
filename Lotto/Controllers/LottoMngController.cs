@@ -42,7 +42,7 @@ namespace Lotto.Controllers
             return Json(true, "", new
             {
                 isSuccessful = "success",
-                isMsg = " 결과 " + getNumbers
+                isMsg = " { " + getNumbers + " } "
             }, JsonRequestBehavior.AllowGet);
         }
 
@@ -96,6 +96,7 @@ namespace Lotto.Controllers
                 if (receivedLastestNumbers.num1 >= 0)
                 {
                     SaveLottoNumbers(receivedLastestNumbers);
+                    //
                     this.GetLatestLottoNumbers();
                 }
                 else
@@ -188,18 +189,20 @@ namespace Lotto.Controllers
 
         #endregion
 
-        #region API: A Result of Full Counted Numbers (work in progress)
+        #region A Result of Full Counted Numbers
+
+        void saveFullCountedNumbers()
+        {
+            Dictionary<int, int> getCountedNumbers = GetFullCountedNumbers();
+
+        }
 
 
-        //http://localhost:53431/LottoMng/GetFullCountedNumbers
-        public JsonResult GetFullCountedNumbers()
+        Dictionary<int, int> GetFullCountedNumbers()
         {
             Dictionary<int, int> sortedItems = lottoMngRepository.GetNumbers();
-            return Json(true, "", new
-            {
-                isSuccessful = "success",
-                isMsg = "OrderBy Descending = " + this.CheckResults(sortedItems)
-            }, JsonRequestBehavior.AllowGet);
+            return sortedItems;
+            
         }
 
 

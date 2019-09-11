@@ -241,7 +241,7 @@ namespace Lotto.Repository
             Dictionary<string, int> hitPoint = new Dictionary<string, int>();
 
 
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 //1. Generate Numbers
                 int hitCount = 0;
@@ -327,9 +327,15 @@ namespace Lotto.Repository
 
             string result = null;
 
-            foreach (var item in hitPoint) //{[3: 3:99, 3]}
+            /*             
+                    {   "hitcount" : "3",
+                        "iteration, seqNo" : "0, 293",
+                        "seqNo" : "293"     },
+             */
+            foreach (var item in hitPoint) //{[3: 3:99,  3]}
             {
-                result = result + item.Key + " 만에 " + item.Value + "가 나왔습니다. ";
+                //result = result + item.Key + " 만에 " + item.Value + "가 나왔습니다. ";
+                result = result + " { \"iteration\" : " + "\"" + item.Key + "\"" + "," + "\"hitcount\" : " + "\"" + item.Value +"\" }, ";
             }
 
 
