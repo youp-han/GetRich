@@ -39,12 +39,12 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            @Html.ActionLink("응용 프로그램 이름", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            @Html.ActionLink("응용 프로그램 이름", "RecentHistory", "LottoMng", new { area = "" }, new { @class = "navbar-brand" })
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li>@Html.ActionLink("홈", "Index", "Home")</li>
-                <li>@Html.ActionLink("정보", "About", "Home")</li>
+                <li>@Html.ActionLink("모든 결과", "History", "LottoMng")</li>
+                <li>@Html.ActionLink("최근 결과", "RecentHistory", "LottoMng")</li>
                 <li>@Html.ActionLink("연락처", "Contact", "Home")</li>
             </ul>
         </div>

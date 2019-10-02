@@ -241,7 +241,7 @@ namespace Lotto.Repository
             Dictionary<string, int> hitPoint = new Dictionary<string, int>();
 
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000000; i++)
             {
                 //1. Generate Numbers
                 int hitCount = 0;
@@ -303,21 +303,25 @@ namespace Lotto.Repository
                     if (hitCount == 6)
                     {
                         hitPoint.Add(hitCount + ": " + i + ":" + item.seqNo, hitCount);
+                        possibilities[6] += 1;
                     }
 
                     if (hitCount == 5)
                     {
                         hitPoint.Add(hitCount + ": " + i + ":" + item.seqNo, hitCount);
+                        possibilities[5] += 1;
                     }
 
                     if (hitCount == 4)
                     {
                         hitPoint.Add(hitCount + ": " + i + ":" + item.seqNo, hitCount);
+                        possibilities[4] += 1;
                     }
 
                     if (hitCount == 3)
                     {
                         hitPoint.Add(hitCount + ": " + i + ":" + item.seqNo, hitCount);
+                        possibilities[3] += 1;
                     }
 
                     hitCount = 0;
@@ -326,16 +330,17 @@ namespace Lotto.Repository
             }
 
             string result = null;
-
+            string result2 = null;
             /*             
                     {   "hitcount" : "3",
                         "iteration, seqNo" : "0, 293",
                         "seqNo" : "293"     },
              */
-            foreach (var item in hitPoint) //{[3: 3:99,  3]}
+            //foreach (var item in hitPoint) //{[3: 3:99,  3]}
+            foreach (var item in possibilities) //{[3: 3:99,  3]}
             {
-                //result = result + item.Key + " 만에 " + item.Value + "가 나왔습니다. ";
-                result = result + " { \"iteration\" : " + "\"" + item.Key + "\"" + "," + "\"hitcount\" : " + "\"" + item.Value +"\" }, ";
+                result = result + item.Key + " 만에 " + item.Value + "가 나왔습니다. ";
+                result2 = result + " { \"possibilities\" : " + "\"" + item.Key + "\"" + "," + "\"hitcount\" : " + "\"" + item.Value +"\" }, ";
             }
 
 

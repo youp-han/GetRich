@@ -41,9 +41,7 @@ namespace Lotto.Controllers
 
             return Json(true, "", new
             {
-                isSuccessful = "success",
-                isMsg = " { " + getNumbers + " } "
-            }, JsonRequestBehavior.AllowGet);
+                isSuccessful = "success", isMsg = " { " + getNumbers + " } "}, JsonRequestBehavior.AllowGet);
         }
 
         #endregion
@@ -109,7 +107,7 @@ namespace Lotto.Controllers
             {
                 return Json(false, "최신결과 없음", new { isSuccessful = "fail", isMsg = e.Message }, JsonRequestBehavior.AllowGet);
             }
-            return Json(true, "", new { isSuccessful = "success", isMsg = "success: " }, JsonRequestBehavior.AllowGet);
+            return Json(true, "업데이트 완료", new { isSuccessful = "success", isMsg = "Update가 성공적으로 완료 되었습니다." }, JsonRequestBehavior.AllowGet);
 
         }
 
