@@ -16,7 +16,7 @@ namespace Lotto
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "LottoMng", action = "History", id = UrlParameter.Optional }
+                defaults: new { controller = "LottoMng", action = "RecentHistory", id = UrlParameter.Optional }
             );
         }
     }

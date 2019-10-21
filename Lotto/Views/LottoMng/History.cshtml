@@ -7,16 +7,16 @@
 }
 
 
-<h2>kkk</h2>
+<h2>로또 모든 결과</h2>
 <table id="example-table-1" width="100%" class="table table-striped table-bordered table-hover">
     <thead>
         <tr>
 
             <th scope="Row">
-              
-               회차
+
+                회차
             </th>
-            
+
             <th>
                 @Html.DisplayNameFor(model => model.num1)
             </th>
@@ -40,7 +40,7 @@
                 @Html.DisplayNameFor(model => model.bonus)
             </th>
 
-         
+
         </tr>
     </thead>
     <tbody>
@@ -53,7 +53,7 @@
                 <td>
                     @i
                 </td>
-               
+
                 <td>
                     @Html.DisplayFor(modelItem => item.num1)
                 </td>
@@ -87,7 +87,9 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-       $("#example-table-1").DataTable();
+        $("#example-table-1").DataTable({
+            "order": [[0, "desc"]]
+        });
 
     });
 
