@@ -1,0 +1,179 @@
+﻿
+@{
+    ViewBag.Title = "WeeklySuggestedNumbers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>WeeklySuggestedNumbers</h2>
+
+
+<body>
+
+    @using (Html.BeginForm("Index_Search", "RoleMNG", FormMethod.Post, new { id = "search-form" }))
+    {
+        <table class="table">
+            <thead>
+                <tr>
+
+                    <th>
+                        마지막 회 결과
+                    </th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div>
+                            <table>
+
+                                <tr>
+
+                                    <td style="width: 300px; padding-right: 5px;">
+                                        @Html.TextBox("LatestNumber", null, new { @class = "form-control", @disabled = true })
+                                    </td>
+
+                                    <td><input id="updateButton" type="button" value="Update" class="btn js-update btn-info" onclick="update_Numbers()" /></td>
+
+                                </tr>
+
+                            </table>
+
+                        </div>
+                    </td>
+
+
+
+                </tr>
+            </tbody>
+        </table>
+    }
+
+
+    <div>
+        Top Numbers in Last 30 weeks
+    </div>
+    <div>
+        <table id="example-table-1" width="100%" class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+
+                    <th scope="Row">
+
+                        번호
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.num1)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.num2)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.num3)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.num4)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.num5)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.num6)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.bonus)
+                    </th>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = ViewBag.topNumber;
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @i
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num1)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num2)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num3)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num4)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num5)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.num6)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.bonus)
+                        </td>
+                    </tr>
+                    i = i - 1;
+
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+    <script type="text/javascript">
+
+            function update_Numbers(){
+                $.ajax({
+                    url: "/LottoMng/GetLatestLottoNumbers/",
+                    type: 'POST',
+                    //beforeSend: function () {
+                    //    $("#overlay").show();
+                    //},
+                    success: function (response) {
+                        $("#overlay").hide();
+                        if (response.result == "success") {
+                            alert(response.data.isMsg);
+                            location.href = location.href;
+
+                        } else {
+                            alert(response.data.isMsg);
+
+                        }
+                    }
+                });
+
+            }
+
+            $(document).ready(function () {
+                $("#example-table-1").DataTable({
+                    "order": [[0, "desc"]],
+                    "lengthMenu": [[30, 50, -1], [30, 50, "All"]]
+
+                });
+
+                var tdArr = new Array();
+                var tr = $("#example-table-1 tbody tr");
+                var td = tr.children();
+                td.each(function (i) {
+                    tdArr.push(td.eq(i).text());
+                });
+                // td.eq(index)를 통해 값을 가져올 수도 있다.
+
+                $("#LatestNumber").val(td.eq(0).text().trim()+ "회" + ": " + td.eq(1).text().trim()+ ", "+ td.eq(2).text().trim()+", "+ td.eq(3).text().trim()+", "+ td.eq(4).text().trim()+", "+ td.eq(5).text().trim()+", "+ td.eq(6).text().trim()+", bonus:"+ td.eq(7).text().trim());
+
+            });
+
+    </script>
+</body>

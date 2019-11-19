@@ -17,6 +17,15 @@ namespace Lotto.Controllers
             lottoMngRepository = new LottoMngRepository(new LottoMNGContext());
         }
 
+        public ActionResult Analytics()
+        {
+            return View();
+        }
+
+        public ActionResult WeeklySuggestedNumbers()
+        {
+            return View();
+        }
 
         #region View Recent History (top 30)
         /// <summary>
