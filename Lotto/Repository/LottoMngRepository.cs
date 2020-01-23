@@ -48,7 +48,15 @@ namespace Lotto.Repository
 
         public int GetTopNumber()
         {
-            return GetLottoHistoryList(1)[0].seqNo;
+            if (GetLottoHistoryList().Count >0)
+            {
+                return GetLottoHistoryList(1)[0].seqNo;
+            }
+            else
+            {
+                return 0;
+            }
+            
         }
 
         #endregion
@@ -90,27 +98,27 @@ namespace Lotto.Repository
             string result = LottoCon.CallAPI("https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=" + getNumTh);
 
             //result = {
-            //    "totSellamnt": 82375586000,
+            //    "totSellamnt": 88465183000, //총판매금액
             //    "returnValue": "success",
-            //    "drwNoDate": "2019-08-24",
-            //    "firstWinamnt": 1874553225,
-            //    "drwtNo6": 39,
-            //    "drwtNo4": 13,
-            //    "firstPrzwnerCo": 10,
-            //    "drwtNo5": 33,
-            //    "bnusNo": 38,
-            //    "firstAccumamnt": 18745532250,
-            //    "drwNo": 873,
-            //    "drwtNo2": 5,
-            //    "drwtNo3": 12,
-            //    "drwtNo1": 3
+            //    "drwNoDate": "2020-01-18", 
+            //    "firstWinamnt": 2377935959,
+            //    "drwtNo6": 43,
+            //    "drwtNo4": 40,
+            //    "firstPrzwnerCo": 9, //1등당첨인원수
+            //    "drwtNo5": 41,
+            //    "bnusNo": 45,
+            //    "firstAccumamnt": 21401423631, //1등 당첨금액
+            //    "drwNo": 894,
+            //    "drwtNo2": 32,
+            //    "drwtNo3": 37,
+            //    "drwtNo1": 19
             //}
 
             //result = {
             //    "returnValue": "fail"
             //}
-
-            Lotto_History returnValue = null;
+            
+        Lotto_History returnValue = null;
 
             Dictionary<string, string> latestNumber = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
 
@@ -125,7 +133,11 @@ namespace Lotto.Repository
                     num4 = Int32.Parse(latestNumber["drwtNo4"]),
                     num5 = Int32.Parse(latestNumber["drwtNo5"]),
                     num6 = Int32.Parse(latestNumber["drwtNo6"]),
-                    bonus = Int32.Parse(latestNumber["bnusNo"])
+                    bonus = Int32.Parse(latestNumber["bnusNo"]),
+                    firstPriceTotal = Decimal.Parse(latestNumber["firstAccumamnt"]),
+                    eachReceivedFirstPrice = Decimal.Parse(latestNumber["firstWinamnt"]),
+                    firstPriceSelected = Int32.Parse(latestNumber["firstPrzwnerCo"]),
+                    drawDate = latestNumber["drwNoDate"]
                 };
 
             }

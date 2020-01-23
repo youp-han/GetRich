@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using Lotto.Models;
 using Lotto.Repository;
+using Microsoft.Ajax.Utilities;
+using Newtonsoft.Json;
 
 
 namespace Lotto.Controllers
@@ -120,6 +123,84 @@ namespace Lotto.Controllers
 
         }
 
+
+        public JsonResult GetLatestLottoNumber()
+        {
+            string strResult = null;
+
+            var result = new JsonResult();
+
+            try
+            {
+                Lotto_History receivedLastestNumbers =
+                    lottoMngRepository.GetLottoHistoryList(1).ToList().SingleOrDefault();
+
+                if (receivedLastestNumbers.seqNo <= 0)
+                {
+                    throw new Exception("아직 최신 결과가 없습니다. 다음에 다시 확인하세요");
+                }
+                else
+                {
+                    strResult = "{"
+                                + "\"drawDate\": \"" + receivedLastestNumbers.drawDate + "\", "
+                                + "\"seqNo\": " + receivedLastestNumbers.seqNo + ", "
+                                + "\"num1\": " + receivedLastestNumbers.num1 + ", "
+                                + "\"num2\": " + receivedLastestNumbers.num2 + ", "
+                                + "\"num3\": " + receivedLastestNumbers.num3 + ", "
+                                + "\"num4\": " + receivedLastestNumbers.num4 + ", "
+                                + "\"num5\": " + receivedLastestNumbers.num5 + ", "
+                                + "\"num6\": " + receivedLastestNumbers.num6 + ", "
+                                + "\"bonus\": " + receivedLastestNumbers.bonus
+                                + "}";
+                }
+
+            }
+            catch (Exception e)
+            {
+                return Json(false, "오류", e.Message, JsonRequestBehavior.AllowGet);
+
+            }
+
+            return Json(true, "완료",  strResult, JsonRequestBehavior.AllowGet);
+
+        }
+
+        public JsonResult GetLatestPriceMoney()
+        {
+            string strResult = null;
+
+            var result = new JsonResult();
+
+            try
+            {
+                Lotto_History receivedLastestNumbers =
+                    lottoMngRepository.GetLottoHistoryList(1).ToList().SingleOrDefault();
+
+                if (receivedLastestNumbers.seqNo <= 0)
+                {
+                    throw new Exception("아직 최신 결과가 없습니다. 다음에 다시 확인하세요");
+                }
+                else
+                {
+                    strResult = "{"
+                                + "\"drawDate\": \"" + receivedLastestNumbers.drawDate + "\", "
+                                + "\"firstPriceTotal\": " + receivedLastestNumbers.firstPriceTotal + ", "
+                                + "\"eachReceivedFirstPrice\": " + receivedLastestNumbers.eachReceivedFirstPrice + ", "
+                                + "\"firstPriceSelected\": " + receivedLastestNumbers.firstPriceSelected
+                                + "}";
+                }
+
+            }
+            catch (Exception e)
+            {
+                return Json(false, "오류", e.Message, JsonRequestBehavior.AllowGet);
+
+            }
+
+            return Json(true, "완료", strResult, JsonRequestBehavior.AllowGet);
+
+        }
+
         #endregion
 
         #region Save History : A Part of Update Process
@@ -139,60 +220,45 @@ namespace Lotto.Controllers
         #endregion
 
         #region DB Initiation
+
         /*         
             USE [GetRich]
-            GO
-            SET ANSI_NULLS ON
-            GO
-            SET QUOTED_IDENTIFIER ON
-            GO
-            CREATE TABLE[dbo].[Lotto_History]
-            (
-            [ID][int] IDENTITY(1,1) NOT NULL,
-            [num1] [int] NOT NULL,
-            [num2] [int] NOT NULL,
-            [num3] [int] NOT NULL,
-            [num4] [int] NOT NULL,
-            [num5] [int] NOT NULL,
-            [num6] [int] NOT NULL,
-            [bonus] [int] NOT NULL,
-            [seqNo] [int] NOT NULL,
-            CONSTRAINT[PK_dbo.Lotto_History] PRIMARY KEY CLUSTERED
-            (
-                [ID] ASC
-            )WITH
-            (
-                PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]
-            ) ON[PRIMARY]
-            GO
-            ALTER TABLE[dbo].[Lotto_History] ADD CONSTRAINT[DF_Lotto_History_seqNo]  DEFAULT((0)) FOR[seqNo]
-            GO
-        
+                GO
+
+                SET ANSI_NULLS ON
+                GO
+
+                SET QUOTED_IDENTIFIER ON
+                GO
+
+                CREATE TABLE[dbo].[Lotto_History]
+                (
+                [ID][int] IDENTITY(1,1) NOT NULL,
+                [num1] [int] NOT NULL,
+                [num2] [int] NOT NULL,
+                [num3] [int] NOT NULL,
+                [num4] [int] NOT NULL,
+                [num5] [int] NOT NULL,
+                [num6] [int] NOT NULL,
+                [bonus] [int] NOT NULL,
+                [seqNo] [int] NOT NULL,
+                [firstPriceTotal] [decimal](18, 0) NULL,
+                [eachReceivedFirstPrice] [decimal](18, 0) NULL,
+                [firstPriceSelected] [int] NULL,
+                [drawDate]
+                [nvarchar]
+                (max) NULL,
+                    CONSTRAINT[PK_dbo.Lotto_History] PRIMARY KEY CLUSTERED
+                (
+                    [ID] ASC
+                )WITH(PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON[PRIMARY]
+                ) ON[PRIMARY] TEXTIMAGE_ON[PRIMARY]
+                GO
+
+                    ALTER TABLE[dbo].[Lotto_History] ADD CONSTRAINT[DF_Lotto_History_seqNo]  DEFAULT((0)) FOR[seqNo]
+                GO
+
        */
-
-        /// <summary>
-        /// POSTMAN 으로 데이터 밀어 넣는 작업을 위한 함수
-        /// GetLatestLottoNumbers 재귀 호출로 인하여 필요 없게 되버림.
-        /// </summary>
-        /// <param name="historyItems"></param>
-        /// <returns></returns>
-        //public bool SaveLottoHistoryResult(List<Lotto_History> historyItems)
-        //{
-
-        //    try
-        //    {
-        //        foreach (Lotto_History items in historyItems)
-        //        {
-        //            this.SaveLottoNumbers(items);
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new Exception("저장하는 중 오류 발생 " + e.Message);
-        //    }
-        //    return true;
-        //}
-
 
         #endregion
 

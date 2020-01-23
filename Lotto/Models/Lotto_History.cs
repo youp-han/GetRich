@@ -3,6 +3,25 @@
 
 namespace Lotto.Models
 {
+
+    //result = {
+    //    "totSellamnt": 88465183000, //총판매금액
+    //    "returnValue": "success",
+    //    "drwNoDate": "2020-01-18", 
+    //    "firstWinamnt": 2377935959,
+    //    "drwtNo6": 43,
+    //    "drwtNo4": 40,
+    //    "firstPrzwnerCo": 9, //1등당첨인원수
+    //    "drwtNo5": 41,
+    //    "bnusNo": 45,
+    //    "firstAccumamnt": 21401423631, //1등 당첨금액
+    //    "drwNo": 894,
+    //    "drwtNo2": 32,
+    //    "drwtNo3": 37,
+    //    "drwtNo1": 19
+    //}
+
+
     public class Lotto_History
     {
 
@@ -26,6 +45,10 @@ namespace Lotto.Models
         [Display(Name = "+ 보너스")]
         public int bonus { get; set; }
 
+        public decimal firstPriceTotal { get; set; }
+        public int firstPriceSelected { get; set; }
+        public decimal eachReceivedFirstPrice { get; set; }
+        public string drawDate { get; set; }
     }
 
 
