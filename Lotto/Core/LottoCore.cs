@@ -8,9 +8,10 @@ namespace Lotto.Core
 {
     public class LottoCore
     {
-
+        private const int maxPossibility = 8145060;
 
         #region Calculate Total Occurence from 1, 45
+
         //Count 계산된 Array
         // 총 45 개이며, key 값= 0..44 (0=1..44=45)
         public int[] GetTotalCounts(List<Lotto_History> lottoHistories)
@@ -57,7 +58,7 @@ namespace Lotto.Core
 
 
         //Count 계산된 Array
-        // 총 45 개이며, key 값= 0..44 (0=1..44=45)
+       
         //Key, Value 로 Dictionary 에 추가한다.
         public Dictionary<int, int> BuildDictionary(int[] results)
         {
