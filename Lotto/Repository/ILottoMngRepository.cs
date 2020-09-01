@@ -11,10 +11,12 @@ namespace Lotto.Repository
         List<Lotto_History> GetLottoHistoryList();
         List<Lotto_History> GetLottoHistoryList(int topCounts);
         void LottoNumberSave(Lotto_History item);
-        Dictionary<int, int> GetNumbers();
+        Dictionary<int, int> GetNumberCounts();
+        Dictionary<int, int> GetNumberCounts(int recentNumbers);
         Lotto_History GetUpdateNumbers();
         int GetTopNumber();
         string GetGetPosNum();
+        List<Numbers_NCounts> ConvertDictionaryToList(Dictionary<int, int> convertedSource);
 
     }
 }

@@ -364,6 +364,7 @@
     <Content Include="Views\LottoMng\RecentHistory.cshtml" />
     <Content Include="Views\LottoMng\Analytics.cshtml" />
     <Content Include="Views\LottoMng\WeeklySuggestedNumbers.cshtml" />
+    <Content Include="Views\LottoMng\AnalyticsRecent.cshtml" />
     <None Include="Views\Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

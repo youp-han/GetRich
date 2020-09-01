@@ -6,7 +6,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Analytics</h2>
+<h2>AnalyticsRecent</h2>
 
 <body>
 
@@ -31,24 +31,36 @@
         </thead>
         <tbody>
              
+        @{
+            int i = 1;
+        }
         @foreach (var item in Model)
         {
-            <tr>
+           
+
+            if (i < 46)
+            {
+                <tr>
                       
 
-                <td>
-                    @Html.DisplayFor(modelItem => item.numbers)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.numbers)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.nCounts)
-                </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.numbers)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.numbers)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.nCounts)
+                    </td>
 
                        
-            </tr>
-                
+                </tr>
+
+            }
+            
+
+            i++;
+
 
         }
 
@@ -56,21 +68,21 @@
     </table>
 </div>
 
-    
+
 </body>
 
 <script type="text/javascript">
 
-            
+
 
     $(document).ready(function () {
         $("#example-table-1").DataTable({
-            "order": [[0, "asc"]],
-            "lengthMenu": [[-1], [ "All"]]
+            "order": [[2, "desc"]],
+            "lengthMenu": [[-1], ["All"]]
 
         });
 
-            
+
     });
 
 </script>

@@ -54,8 +54,13 @@ namespace Lotto.Models
 
     public class Numbers_NCounts
     {
+
+        [Display(Name = "SeqNo")]
         public int ID { get; set; }
+
+        [Display(Name = "번호")]
         public int numbers { get; set; }
+        [Display(Name = "횟수")]
         public int nCounts { get; set; }
     }
 }

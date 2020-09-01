@@ -46,6 +46,21 @@ namespace Lotto.Core
                     {
                         results[i] += 1;
                     }
+                }
+            }
+
+            return results;
+        }
+
+        public int[] GetTotalBonusCounts(List<Lotto_History> lottoHistories)
+        {
+            int[] results = new int[45];
+
+            foreach (var item in lottoHistories)
+            {
+                for (int i = 0; i < results.Count(); i++)
+                {
+                    
                     if (item.bonus.Equals(i + 1))
                     {
                         results[i] += 1;
@@ -58,7 +73,7 @@ namespace Lotto.Core
 
 
         //Count 계산된 Array
-       
+
         //Key, Value 로 Dictionary 에 추가한다.
         public Dictionary<int, int> BuildDictionary(int[] results)
         {

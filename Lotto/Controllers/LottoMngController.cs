@@ -22,15 +22,27 @@ namespace Lotto.Controllers
 
         public ActionResult Analytics()
         {
-            return View();
+            List<Numbers_NCounts> getFullCountedNumbers = this.GetCountedNumbers();
+            return View(getFullCountedNumbers);
         }
+
+
+        public ActionResult AnalyticsRecent()
+        {
+            //최신 회자
+            int recentNumbers = 30;
+            List<Numbers_NCounts> getFullCountedNumbers = this.GetCountedNumbers(recentNumbers);
+            return View(getFullCountedNumbers);
+        }
+
+
 
         public ActionResult WeeklySuggestedNumbers()
         {
             return View();
         }
 
-        #region View Recent History (top 30)
+        #region 최근결과 View Recent History (top 30)
         /// <summary>
         ///  RecentHistory View
         /// </summary>
@@ -41,19 +53,6 @@ namespace Lotto.Controllers
             ViewBag.topNumber = lottoMngRepository.GetTopNumber();
 
             return View(reCentHistories);
-        }
-
-        #endregion
-
-        #region Possibilities of GeneratedNumbers : API (work in progress) domain action required
-
-        public JsonResult GetPossibilities()
-        {
-            string getNumbers = lottoMngRepository.GetGetPosNum();
-
-            return Json(true, "", new
-            {
-                isSuccessful = "success", isMsg = " { " + getNumbers + " } "}, JsonRequestBehavior.AllowGet);
         }
 
         #endregion
@@ -264,21 +263,50 @@ namespace Lotto.Controllers
 
         #region A Result of Full Counted Numbers
 
-        void saveFullCountedNumbers()
+
+        List<Numbers_NCounts> GetCountedNumbers()
         {
-            Dictionary<int, int> getCountedNumbers = GetFullCountedNumbers();
-
+            return lottoMngRepository.ConvertDictionaryToList(this.GetFullCountedNumbers());
         }
-
 
         Dictionary<int, int> GetFullCountedNumbers()
         {
-            Dictionary<int, int> sortedItems = lottoMngRepository.GetNumbers();
+            Dictionary<int, int> sortedItems = lottoMngRepository.GetNumberCounts();
             return sortedItems;
             
         }
 
 
+        List<Numbers_NCounts> GetCountedNumbers(int recentNumbers)
+        {
+            return lottoMngRepository.ConvertDictionaryToList(this.GetFullCountedNumbers(recentNumbers));
+        }
+
+        Dictionary<int, int> GetFullCountedNumbers(int recentNumbers)
+        {
+            Dictionary<int, int> sortedItems = lottoMngRepository.GetNumberCounts(recentNumbers);
+            return sortedItems;
+
+        }
+
+        #endregion
+
+
+        #region NIU Possibilities of GeneratedNumbers : API (work in progress) domain action required
+
+        public JsonResult GetPossibilities()
+        {
+            string getNumbers = lottoMngRepository.GetGetPosNum();
+
+            return Json(true, "", new
+            {
+                isSuccessful = "success",
+                isMsg = " { " + getNumbers + " } "
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+        
         /// <summary>
         /// Test Method
         /// </summary>
@@ -296,8 +324,6 @@ namespace Lotto.Controllers
 
             return resultCount2;
         }
-
-        #endregion
 
     }
 }

@@ -195,7 +195,7 @@ namespace Lotto.Repository
         /// it sorts the most occured numbers DESC
         /// </summary>
         /// <returns></returns>
-        public Dictionary<int, int> GetNumbers()
+        public Dictionary<int, int> GetNumberCounts()
         {
             //전체 리스트
             var list = this.GetLottoHistoryList();
@@ -212,14 +212,38 @@ namespace Lotto.Repository
 
             //Dictionary 를 Key 값으로 Sort 한다. (DESC)
             var sortedItems = lottoCore.GetDictionarySorted(lottoOccurence, results.Count());
-            return sortedItems;
+
+            return lottoOccurence;
 
         }
 
-        public Dictionary<int, int> GetNumbers(int topFive)
+        public List<Numbers_NCounts> ConvertDictionaryToList(Dictionary<int, int> convertedSource)
+        {
+            List<Numbers_NCounts> convertedResult = new List<Numbers_NCounts>();
+
+            //int countsID = 1;
+            foreach (var item in convertedSource)
+            {
+                Numbers_NCounts counts = new Numbers_NCounts();
+
+                //counts.ID = countsID;
+                counts.numbers = item.Key;
+                counts.nCounts = item.Value;
+                //countsID++;
+                convertedResult.Add(counts);
+            }
+
+            var sortedList = convertedResult.OrderBy(m => m.nCounts).ToList();
+
+
+            return sortedList;
+
+        }
+
+        public Dictionary<int, int> GetNumberCounts(int recentNumbers)
         {
             //전체 리스트
-            var list = this.GetLottoHistoryList(topFive);
+            var list = this.GetLottoHistoryList(recentNumbers);
 
             //Count 계산된 Array
             // 총 45 개이며, key 값= 0..44 (0=1..44=45)
@@ -239,9 +263,11 @@ namespace Lotto.Repository
 
         #endregion
 
+
+        #region 사용안하는 코드
         public string GetGetPosNum()
         {
-            
+
             Dictionary<int, int> possibilities = new Dictionary<int, int>();
             possibilities.Add(1, 0);
             possibilities.Add(2, 0);
@@ -276,7 +302,7 @@ namespace Lotto.Repository
 
                 foreach (var item in lottoHistories)
                 {
-                    
+
                     if (item.num1 == objGetNumbers.num1)
                     {
                         hitCount += 1;
@@ -300,7 +326,7 @@ namespace Lotto.Repository
                     if (item.num6 == objGetNumbers.num6)
                     {
                         hitCount += 1;
-                    }                 
+                    }
 
 
                     int count = 0;
@@ -352,7 +378,7 @@ namespace Lotto.Repository
             foreach (var item in possibilities) //{[3: 3:99,  3]}
             {
                 result = result + item.Key + " 만에 " + item.Value + "가 나왔습니다. ";
-                result2 = result + " { \"possibilities\" : " + "\"" + item.Key + "\"" + "," + "\"hitcount\" : " + "\"" + item.Value +"\" }, ";
+                result2 = result + " { \"possibilities\" : " + "\"" + item.Key + "\"" + "," + "\"hitcount\" : " + "\"" + item.Value + "\" }, ";
             }
 
 
@@ -363,6 +389,8 @@ namespace Lotto.Repository
 
             //4. Show Counted Numbers.
         }
+        #endregion
+
 
 
     }
