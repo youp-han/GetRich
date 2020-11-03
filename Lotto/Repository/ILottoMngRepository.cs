@@ -18,5 +18,8 @@ namespace Lotto.Repository
         string GetGetPosNum();
         List<Numbers_NCounts> ConvertDictionaryToList(Dictionary<int, int> convertedSource);
 
+        List<Target_Numbers> GetTotalCountByPlace();
+
+
     }
 }

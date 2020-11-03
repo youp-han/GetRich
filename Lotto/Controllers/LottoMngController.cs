@@ -39,8 +39,11 @@ namespace Lotto.Controllers
 
         public ActionResult WeeklySuggestedNumbers()
         {
-            return View();
+            ViewBag.topNumber = lottoMngRepository.GetTopNumber();
+            List<Target_Numbers> getList = lottoMngRepository.GetTotalCountByPlace();
+            return View(getList);
         }
+
 
         #region 최근결과 View Recent History (top 30)
         /// <summary>

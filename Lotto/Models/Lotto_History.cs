@@ -63,4 +63,35 @@ namespace Lotto.Models
         [Display(Name = "횟수")]
         public int nCounts { get; set; }
     }
+
+
+    public class Two_Numbers
+    {
+        public float Num1 { get; set; }
+        public float Num2 { get; set; }
+    }
+
+    public class Target_Number
+    {
+        public int targetNumber { get; set; }
+        public int targetNumberCount { get; set; }
+    }
+
+    public class Target_Numbers
+    {
+        public int targetNumber1 { get; set; }
+        public int targetNumberCount1 { get; set; }
+        public int targetNumber2 { get; set; }
+        public int targetNumberCount2 { get; set; }
+        public int targetNumber3 { get; set; }
+        public int targetNumberCount3 { get; set; }
+        public int targetNumber4 { get; set; }
+        public int targetNumberCount4 { get; set; }
+        public int targetNumber5 { get; set; }
+        public int targetNumberCount5 { get; set; }
+        public int targetNumber6 { get; set; }
+        public int targetNumberCount6 { get; set; }
+        public int targetNumber7 { get; set; }
+        public int targetNumberCount7 { get; set; }
+    }
 }

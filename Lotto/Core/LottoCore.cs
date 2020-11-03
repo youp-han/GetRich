@@ -71,6 +71,25 @@ namespace Lotto.Core
             return results;
         }
 
+        public int[] GetEachListCounts(List<Target_Number> targetList)
+        {
+            int[] results = new int[45];
+
+            foreach (var item in targetList)
+            {
+                for (int i = 0; i < results.Count(); i++)
+                {
+
+                    if (item.targetNumber.Equals(i + 1))
+                    {
+                        results[i] += 1;
+                    }
+                }
+            }
+
+            return results;
+        }
+
 
         //Count 계산된 Array
 

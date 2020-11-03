@@ -1,179 +1,182 @@
-﻿
+﻿@using Microsoft.Ajax.Utilities
+@model IEnumerable<Lotto.Models.Target_Numbers>
 @{
-    ViewBag.Title = "WeeklySuggestedNumbers";
+    ViewBag.Title = "LottoTop";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>WeeklySuggestedNumbers</h2>
 
-
 <body>
 
-    @using (Html.BeginForm("Index_Search", "RoleMNG", FormMethod.Post, new { id = "search-form" }))
-    {
-        <table class="table">
-            <thead>
-                <tr>
-
-                    <th>
-                        마지막 회 결과
-                    </th>
-
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <div>
-                            <table>
-
-                                <tr>
-
-                                    <td style="width: 300px; padding-right: 5px;">
-                                        @Html.TextBox("LatestNumber", null, new { @class = "form-control", @disabled = true })
-                                    </td>
-
-                                    <td><input id="updateButton" type="button" value="Update" class="btn js-update btn-info" onclick="update_Numbers()" /></td>
-
-                                </tr>
-
-                            </table>
-
-                        </div>
-                    </td>
-
-
-
-                </tr>
-            </tbody>
-        </table>
-    }
-
-
     <div>
-        Top Numbers in Last 30 weeks
+        WeeklySuggestedNumbers
     </div>
-    <div>
-        <table id="example-table-1" width="100%" class="table table-striped table-bordered table-hover">
-            <thead>
-                <tr>
+<div>
+    <table id="example-table-1" width="100%" class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
 
-                    <th scope="Row">
-
-                        번호
+                <th>
+                    1번째
+                </th>
+                <th>
+                    돌출수
+                </th>
+                <th>
+                    2번째
+                </th>
+                <th>
+                    돌출수
+                </th>
+                <th>
+                    3번째
+                </th>
+                <th>
+                    돌출수
+                </th>
+                <th>
+                    4번째
+                </th>
+                <th>
+                    돌출수
+                </th>
+                <th>
+                    5번째
+                </th>
+                <th>
+                    돌출수
+                </th>
+                <th>
+                    6번째
+                </th>
+                <th>
+                    돌출수
+                </th>
+                <th>
+                    보너스
                     </th>
+                <th>
+                    돌출수
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+             
+        @{
+            float totalNumber = ViewBag.topNumber;
+            string topNumber = null;
+            float resultNumber = 0;
+        }
+        @foreach (var item in Model)
+        {
 
-                    <th>
-                        @Html.DisplayNameFor(model => model.num1)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.num2)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.num3)
-                    </th>
+            {
+            <tr>
 
-                    <th>
-                        @Html.DisplayNameFor(model => model.num4)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.num5)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.num6)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.bonus)
-                    </th>
-
-
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    int i = ViewBag.topNumber;
-                }
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>
-                            @i
-                        </td>
-
-                        <td>
-                            @Html.DisplayFor(modelItem => item.num1)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.num2)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.num3)
-                        </td>
-
-                        <td>
-                            @Html.DisplayFor(modelItem => item.num4)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.num5)
-                        </td>
-
-                        <td>
-                            @Html.DisplayFor(modelItem => item.num6)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.bonus)
-                        </td>
-                    </tr>
-                    i = i - 1;
-
-                }
-
-            </tbody>
-        </table>
-    </div>
-
-    <script type="text/javascript">
-
-            function update_Numbers(){
-                $.ajax({
-                    url: "/LottoMng/GetLatestLottoNumbers/",
-                    type: 'POST',
-                    //beforeSend: function () {
-                    //    $("#overlay").show();
-                    //},
-                    success: function (response) {
-                        $("#overlay").hide();
-                        if (response.result == "success") {
-                            alert(response.data.isMsg);
-                            location.href = location.href;
-
-                        } else {
-                            alert(response.data.isMsg);
-
-                        }
+                <td>
+                    @Html.DisplayFor(modelItem => item.targetNumber1)
+                </td>
+                <td>
+                    
+                    @{
+                        topNumber = @Html.DisplayFor(modelItem => item.targetNumberCount1).ToString();
+                        resultNumber = topNumber.AsFloat() / totalNumber * 100;
                     }
-                });
+                    @Html.DisplayFor(modelItem => item.targetNumberCount1) (@resultNumber.ToString("#")%)
+
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.targetNumber2)
+                </td>
+                <td>
+                    @{
+                        topNumber = @Html.DisplayFor(modelItem => item.targetNumberCount2).ToString();
+                        resultNumber = topNumber.AsFloat() / totalNumber * 100;
+                    }
+                    @Html.DisplayFor(modelItem => item.targetNumberCount2) (@resultNumber.ToString("#")%)
+                </td>
+                <td>
+
+                    @Html.DisplayFor(modelItem => item.targetNumber3)
+                </td>
+                <td>
+                    @{
+                        topNumber = @Html.DisplayFor(modelItem => item.targetNumberCount3).ToString();
+                        resultNumber = topNumber.AsFloat() / totalNumber * 100;
+                    }
+                    @Html.DisplayFor(modelItem => item.targetNumberCount3) (@resultNumber.ToString("#")%)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.targetNumber4)
+                </td>
+                <td>
+                    @{
+                        topNumber = @Html.DisplayFor(modelItem => item.targetNumberCount4).ToString();
+                        resultNumber = topNumber.AsFloat() / totalNumber * 100;
+                    }
+                    @Html.DisplayFor(modelItem => item.targetNumberCount4) (@resultNumber.ToString("#")%)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.targetNumber5)
+                </td>
+                <td>
+                    @{
+                        topNumber = @Html.DisplayFor(modelItem => item.targetNumberCount5).ToString();
+                        resultNumber = topNumber.AsFloat() / totalNumber * 100;
+                    }
+                    @Html.DisplayFor(modelItem => item.targetNumberCount5) (@resultNumber.ToString("#") %)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.targetNumber6)
+                </td>
+                <td>
+                    @{
+                        topNumber = @Html.DisplayFor(modelItem => item.targetNumberCount6).ToString();
+                        resultNumber = topNumber.AsFloat() / totalNumber * 100;
+                    }
+                    @Html.DisplayFor(modelItem => item.targetNumberCount6) (@resultNumber.ToString("#")%)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.targetNumber7)
+                </td>
+                <td>
+                    @{
+                        topNumber = @Html.DisplayFor(modelItem => item.targetNumberCount7).ToString();
+                        resultNumber = topNumber.AsFloat() / totalNumber * 100;
+                    }
+                    @Html.DisplayFor(modelItem => item.targetNumberCount7) (@resultNumber.ToString("#")%)
+                </td>
+
+
+            </tr>
 
             }
+            
 
-            $(document).ready(function () {
-                $("#example-table-1").DataTable({
-                    "order": [[0, "desc"]],
-                    "lengthMenu": [[30, 50, -1], [30, 50, "All"]]
+      
 
-                });
 
-                var tdArr = new Array();
-                var tr = $("#example-table-1 tbody tr");
-                var td = tr.children();
-                td.each(function (i) {
-                    tdArr.push(td.eq(i).text());
-                });
-                // td.eq(index)를 통해 값을 가져올 수도 있다.
+        }
 
-                $("#LatestNumber").val(td.eq(0).text().trim()+ "회" + ": " + td.eq(1).text().trim()+ ", "+ td.eq(2).text().trim()+", "+ td.eq(3).text().trim()+", "+ td.eq(4).text().trim()+", "+ td.eq(5).text().trim()+", "+ td.eq(6).text().trim()+", bonus:"+ td.eq(7).text().trim());
+        </tbody>
+    </table>
+</div>
 
-            });
 
-    </script>
 </body>
+
+<script type="text/javascript">
+
+
+
+    $(document).ready(function () {
+        $("#example-table-1").DataTable({
+            "lengthMenu": [[-1], ["All"]]
+
+        });
+
+
+    });
+
+</script>

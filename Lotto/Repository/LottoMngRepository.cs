@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Web.Mvc.Html;
 using Lotto.Models;
 using Lotto.Core;
+using Microsoft.Ajax.Utilities;
+using Microsoft.ML.Transforms.Text;
 using Newtonsoft.Json;
 
 namespace Lotto.Repository
@@ -263,6 +268,68 @@ namespace Lotto.Repository
 
         #endregion
 
+
+        public List<Target_Numbers> GetTotalCountByPlace()
+        {
+            //1 get first num
+            var list = this.GetLottoHistoryList();
+            List<Target_Number> firstSet = GetList(list.Select(f => new Target_Number() {targetNumber = f.num1}).ToList());
+            List<Target_Number> secondtSet = GetList(list.Select(f => new Target_Number() { targetNumber = f.num2 }).ToList());
+            List<Target_Number> thirdSet = GetList(list.Select(f => new Target_Number() { targetNumber = f.num3 }).ToList());
+            List<Target_Number> fourthSet = GetList(list.Select(f => new Target_Number() { targetNumber = f.num4 }).ToList());
+            List<Target_Number> fifthSet = GetList(list.Select(f => new Target_Number() { targetNumber = f.num5 }).ToList());
+            List<Target_Number> sixthSet = GetList(list.Select(f => new Target_Number() { targetNumber = f.num6 }).ToList());
+            List<Target_Number> luckySet = GetList(list.Select(f => new Target_Number() { targetNumber = f.bonus }).ToList());
+            
+            List<Target_Numbers> allNumbers = new List<Target_Numbers>();
+
+            int topCount = 5;
+
+            for (int i = 0; i < topCount; i++)
+            {
+                Target_Numbers an = new Target_Numbers();
+
+                an.targetNumber1 = firstSet[i].targetNumber;
+                an.targetNumber2 = secondtSet[i].targetNumber;
+                an.targetNumber3 = thirdSet[i].targetNumber;
+                an.targetNumber4 = fourthSet[i].targetNumber;
+                an.targetNumber5 = fifthSet[i].targetNumber;
+                an.targetNumber6 = sixthSet[i].targetNumber;
+                an.targetNumber7 = luckySet[i].targetNumber;
+
+                an.targetNumberCount1 = firstSet[i].targetNumberCount;
+                an.targetNumberCount2 = secondtSet[i].targetNumberCount;
+                an.targetNumberCount3 = thirdSet[i].targetNumberCount;
+                an.targetNumberCount4 = fourthSet[i].targetNumberCount;
+                an.targetNumberCount5 = fifthSet[i].targetNumberCount;
+                an.targetNumberCount6 = sixthSet[i].targetNumberCount;
+                an.targetNumberCount7 = luckySet[i].targetNumberCount;
+
+                allNumbers.Add(an);
+            }
+
+            return allNumbers;
+        }
+
+
+        List<Target_Number> GetList(List<Target_Number> result)
+        {
+
+            var countResult =lottoCore.GetEachListCounts(result);
+            Dictionary<int, int> lottoOccurence = lottoCore.BuildDictionary(countResult);
+
+            List < Target_Number > finalResult = new List<Target_Number>();
+
+            foreach (var items in lottoOccurence)
+            {
+                Target_Number tNumber = new Target_Number();
+                tNumber.targetNumber = items.Key;
+                tNumber.targetNumberCount = items.Value;
+                finalResult.Add(tNumber);
+            }
+
+            return finalResult.OrderByDescending(f=>f.targetNumberCount).ToList();
+        }
 
         #region 사용안하는 코드
         public string GetGetPosNum()
