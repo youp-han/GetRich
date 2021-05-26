@@ -40,7 +40,7 @@ namespace Lotto.Controllers
         public ActionResult WeeklySuggestedNumbers()
         {
             ViewBag.topNumber = lottoMngRepository.GetTopNumber();
-            List<Target_Numbers> getList = lottoMngRepository.GetTotalCountByPlace();
+            List<Target_Numbers> getList = lottoMngRepository.GetTotalCountByPlace(5);
             return View(getList);
         }
 
@@ -92,6 +92,48 @@ namespace Lotto.Controllers
 
         #region Update History :API (work in progress)
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        ///
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult GetRecommendedNumbers()
+        {
+
+            string strResult = null;
+
+            try
+            {
+                Target_Numbers getList = lottoMngRepository.GetTotalCountByPlace(1).SingleOrDefault();
+
+                if (getList.targetNumberCount1 <= 0)
+                {
+                    throw new Exception("아직 결과가 없습니다. 다음에 다시 확인하세요");
+                }
+                else
+                {
+                    strResult = "{"
+                                + "\"num1\": " + getList.targetNumber1 + ", "
+                                + "\"num2\": " + getList.targetNumber2 + ", "
+                                + "\"num3\": " + getList.targetNumber3 + ", "
+                                + "\"num4\": " + getList.targetNumber4 + ", "
+                                + "\"num5\": " + getList.targetNumber5 + ", "
+                                + "\"num6\": " + getList.targetNumber6 + ", "
+                                + "\"bonus\": " + getList.targetNumber7
+                                + "}";
+                }
+
+            }
+            catch (Exception e)
+            {
+                return Json(false, "최신결과 없음", new { isSuccessful = "fail", isMsg = e.Message }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(true, "완료", strResult, JsonRequestBehavior.AllowGet);
+
+        }
         /// <summary>
         /// Lotto 번호 저장
         /// </summary>

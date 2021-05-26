@@ -269,7 +269,7 @@ namespace Lotto.Repository
         #endregion
 
 
-        public List<Target_Numbers> GetTotalCountByPlace()
+        public List<Target_Numbers> GetTotalCountByPlace(int topCount)
         {
             //1 get first num
             var list = this.GetLottoHistoryList();
@@ -283,7 +283,6 @@ namespace Lotto.Repository
             
             List<Target_Numbers> allNumbers = new List<Target_Numbers>();
 
-            int topCount = 5;
 
             for (int i = 0; i < topCount; i++)
             {
