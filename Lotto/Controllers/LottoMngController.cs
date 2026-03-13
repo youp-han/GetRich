@@ -46,15 +46,8 @@ namespace Lotto.Controllers
 
         public ActionResult WeeklySuggestedNumbers()
         {
-            int topNumber = lottoMngRepository.GetTopNumber();
-            ViewBag.topNumber = topNumber;
-            ViewBag.pageTitle = "이번주 추천 번호 (10세트)";
-            ViewBag.subTitle = "총 " + topNumber + " 회차 데이터 기반";
-            ViewBag.colStrategy = "전략";
-            ViewBag.colBonus = "+ 보너스";
-            ViewBag.footerNote = "괄호 안 숫자는 해당 전략의 기준 기간 내 출현 횟수입니다.";
-            List<Target_Numbers> getList = lottoMngRepository.GetWeeklySuggestedNumbers();
-            return View(getList);
+            WeeklySuggestedViewModel vm = lottoMngRepository.GetWeeklySuggestedViewModel();
+            return View(vm);
         }
 
 

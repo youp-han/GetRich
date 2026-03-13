@@ -1,27 +1,85 @@
-@model IEnumerable<Lotto.Models.Target_Numbers>
+@model Lotto.Models.WeeklySuggestedViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    string secDist   = "구간별 번호 분포 비교";
+    string secSets   = "분포 기반 추천 번호";
+    string colRange  = "구간";
+    string colAll    = "역대 전체";
+    string col52     = "최근 52회";
+    string col26     = "최근 26회";
+    string col10     = "최근 10회";
+    string colGap52  = "역대 vs 52회";
+    string colGap26  = "역대 vs 26회";
+    string colGap10  = "역대 vs 10회";
+    string colStrat  = "전략";
+    string colBonus  = "+ 보너스";
+    string note1 = "Gap = 역대 평균 - 최근 비율. 양수(+)면 최근에 해당 구간이 덜 나왔음 (오버듀).";
+    string note2 = "괄호 안 숫자는 역대 전체 출현 횟수.";
+    string subTitle  = "총 " + Model.TotalDraws + " 회차 데이터 기반";
 }
 
-<h2>@ViewBag.pageTitle</h2>
-<p class="text-muted">@ViewBag.subTitle</p>
+<h3>@secDist</h3>
+<p class="text-muted">@subTitle</p>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover table-sm">
+        <thead class="thead-dark">
+            <tr>
+                <th>@colRange</th>
+                <th>@colAll</th>
+                <th>@col52</th>
+                <th>@col26</th>
+                <th>@col10</th>
+                <th>@colGap52</th>
+                <th>@colGap26</th>
+                <th>@colGap10</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var r in Model.RangeDistributions)
+        {
+            <tr>
+                <td><strong>@r.RangeName</strong></td>
+                <td>@r.AllTimeRate.ToString("0.0")%</td>
+                <td>@r.Recent52Rate.ToString("0.0")%</td>
+                <td>@r.Recent26Rate.ToString("0.0")%</td>
+                <td>@r.Recent10Rate.ToString("0.0")%</td>
+                <td class="@(r.Gap52 > 2 ? "text-danger" : r.Gap52 < -2 ? "text-primary" : "")">
+                    @(r.Gap52 > 0 ? "+" : "")@r.Gap52.ToString("0.0")%
+                </td>
+                <td class="@(r.Gap26 > 2 ? "text-danger" : r.Gap26 < -2 ? "text-primary" : "")">
+                    @(r.Gap26 > 0 ? "+" : "")@r.Gap26.ToString("0.0")%
+                </td>
+                <td class="@(r.Gap10 > 2 ? "text-danger" : r.Gap10 < -2 ? "text-primary" : "")">
+                    @(r.Gap10 > 0 ? "+" : "")@r.Gap10.ToString("0.0")%
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+<p class="text-muted"><small>@note1</small></p>
+
+<hr/>
+
+<h3>@secSets</h3>
 
 <div class="table-responsive">
     <table class="table table-striped table-bordered table-hover">
         <thead>
             <tr>
-                <th style="min-width:240px">@ViewBag.colStrategy</th>
+                <th style="min-width:240px">@colStrat</th>
                 <th>1</th>
                 <th>2</th>
                 <th>3</th>
                 <th>4</th>
                 <th>5</th>
                 <th>6</th>
-                <th>@ViewBag.colBonus</th>
+                <th>@colBonus</th>
             </tr>
         </thead>
         <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.SuggestedSets)
         {
             <tr>
                 <td><strong>@item.setLabel</strong></td>
@@ -37,5 +95,4 @@
         </tbody>
     </table>
 </div>
-
-<p class="text-muted"><small>@ViewBag.footerNote</small></p>
+<p class="text-muted"><small>@note2</small></p>
