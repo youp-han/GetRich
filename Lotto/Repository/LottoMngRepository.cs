@@ -100,51 +100,42 @@ namespace Lotto.Repository
         /// <returns></returns>
         Lotto_History getLatestNumber(int getNumTh)
         {
-            string result = LottoCon.CallAPI("https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=" + getNumTh);
+            string url = "https://www.dhlottery.co.kr/lt645/selectPstLt645Info.do?srchLtEpsd=";
+            string result = LottoCon.CallAPI(url + getNumTh);
 
-            //result = {
-            //    "totSellamnt": 88465183000, //총판매금액
-            //    "returnValue": "success",
-            //    "drwNoDate": "2020-01-18", 
-            //    "firstWinamnt": 2377935959,
-            //    "drwtNo6": 43,
-            //    "drwtNo4": 40,
-            //    "firstPrzwnerCo": 9, //1등당첨인원수
-            //    "drwtNo5": 41,
-            //    "bnusNo": 45,
-            //    "firstAccumamnt": 21401423631, //1등 당첨금액
-            //    "drwNo": 894,
-            //    "drwtNo2": 32,
-            //    "drwtNo3": 37,
-            //    "drwtNo1": 19
-            //}
+            // 새 API 응답 구조:
+            // {"resultCode":null,"resultMessage":null,"data":{"list":[{"ltEpsd":1,"tm1WnNo":10,...}]}}
 
-            //result = {
-            //    "returnValue": "fail"
-            //}
-            
-        Lotto_History returnValue = null;
+            Lotto_History returnValue = null;
 
-            Dictionary<string, string> latestNumber = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
+            var json = Newtonsoft.Json.Linq.JObject.Parse(result);
+            var list = json["data"]?["list"] as Newtonsoft.Json.Linq.JArray;
 
-            if(latestNumber["returnValue"].Equals("success"))
+            if (list != null && list.Count > 0)
             {
+                var item = list[0];
+
+                // ltRflYmd 형식: "20021207" → "2002-12-07"
+                string rawDate = item["ltRflYmd"]?.ToString() ?? "";
+                string drawDate = rawDate.Length == 8
+                    ? rawDate.Substring(0, 4) + "-" + rawDate.Substring(4, 2) + "-" + rawDate.Substring(6, 2)
+                    : rawDate;
+
                 returnValue = new Lotto_History()
                 {
-                    seqNo = Int32.Parse(latestNumber["drwNo"]),
-                    num1 = Int32.Parse(latestNumber["drwtNo1"]),
-                    num2 = Int32.Parse(latestNumber["drwtNo2"]),
-                    num3 = Int32.Parse(latestNumber["drwtNo3"]),
-                    num4 = Int32.Parse(latestNumber["drwtNo4"]),
-                    num5 = Int32.Parse(latestNumber["drwtNo5"]),
-                    num6 = Int32.Parse(latestNumber["drwtNo6"]),
-                    bonus = Int32.Parse(latestNumber["bnusNo"]),
-                    firstPriceTotal = Decimal.Parse(latestNumber["firstAccumamnt"]),
-                    eachReceivedFirstPrice = Decimal.Parse(latestNumber["firstWinamnt"]),
-                    firstPriceSelected = Int32.Parse(latestNumber["firstPrzwnerCo"]),
-                    drawDate = latestNumber["drwNoDate"]
+                    seqNo = (int)item["ltEpsd"],
+                    num1 = (int)item["tm1WnNo"],
+                    num2 = (int)item["tm2WnNo"],
+                    num3 = (int)item["tm3WnNo"],
+                    num4 = (int)item["tm4WnNo"],
+                    num5 = (int)item["tm5WnNo"],
+                    num6 = (int)item["tm6WnNo"],
+                    bonus = (int)item["bnsWnNo"],
+                    firstPriceTotal = (decimal)item["rnk1SumWnAmt"],
+                    eachReceivedFirstPrice = (decimal)item["rnk1WnAmt"],
+                    firstPriceSelected = (int)item["rnk1WnNope"],
+                    drawDate = drawDate
                 };
-
             }
             else
             {
@@ -329,6 +320,284 @@ namespace Lotto.Repository
 
             return finalResult.OrderByDescending(f=>f.targetNumberCount).ToList();
         }
+
+        #region Weekly Suggested Numbers (10 Sets)
+
+        public List<Target_Numbers> GetWeeklySuggestedNumbers()
+        {
+            var allHistory     = GetLottoHistoryList();
+            var allFreq        = GetFrequencyDict(allHistory);
+            var allBonusFreq   = GetBonusFrequencyDict(allHistory);
+            var result         = new List<Target_Numbers>();
+
+            // Set 1: 역대 전체 빈도 Top 6
+            var nums1 = GetTopFrequent(allFreq, 6);
+            result.Add(BuildSet("역대 전체 빈도 Top 6", nums1, allFreq, PickBonus(allBonusFreq, nums1), allBonusFreq));
+
+            // Set 2: 최근 104회 빈도 Top 6 (약 2년)
+            var hist104 = GetLottoHistoryList(104);
+            var freq104 = GetFrequencyDict(hist104);
+            var bonus104Freq = GetBonusFrequencyDict(hist104);
+            var nums2 = GetTopFrequent(freq104, 6);
+            result.Add(BuildSet("최근 104회 빈도 Top 6 (2년)", nums2, freq104, PickBonus(bonus104Freq, nums2), bonus104Freq));
+
+            // Set 3: 최근 52회 빈도 Top 6 (약 1년)
+            var hist52 = GetLottoHistoryList(52);
+            var freq52 = GetFrequencyDict(hist52);
+            var bonus52Freq = GetBonusFrequencyDict(hist52);
+            var nums3 = GetTopFrequent(freq52, 6);
+            result.Add(BuildSet("최근 52회 빈도 Top 6 (1년)", nums3, freq52, PickBonus(bonus52Freq, nums3), bonus52Freq));
+
+            // Set 4: 최근 26회 빈도 Top 6 (약 반년)
+            var hist26 = GetLottoHistoryList(26);
+            var freq26 = GetFrequencyDict(hist26);
+            var bonus26Freq = GetBonusFrequencyDict(hist26);
+            var nums4 = GetTopFrequent(freq26, 6);
+            result.Add(BuildSet("최근 26회 빈도 Top 6 (반년)", nums4, freq26, PickBonus(bonus26Freq, nums4), bonus26Freq));
+
+            // Set 5: 최근 10회 빈도 Top 6
+            var hist10 = GetLottoHistoryList(10);
+            var freq10 = GetFrequencyDict(hist10);
+            var bonus10Freq = GetBonusFrequencyDict(hist10);
+            var nums5 = GetTopFrequent(freq10, 6);
+            result.Add(BuildSet("최근 10회 빈도 Top 6", nums5, freq10, PickBonus(bonus10Freq, nums5), bonus10Freq));
+
+            // Set 6: Hot 3 (최근 52회 상위) + Cold 3 (역대 하위)
+            var hot3  = GetTopFrequent(freq52, 3);
+            var cold3 = GetBottomFrequent(allFreq, 3, hot3);
+            var nums6 = hot3.Concat(cold3).OrderBy(x => x).ToList();
+            result.Add(BuildSet("Hot 3 + Cold 3 혼합", nums6, allFreq, PickBonus(allBonusFreq, nums6), allBonusFreq));
+
+            // Set 7: 역발상 Cold - 역대 가장 적게 나온 번호 6개
+            var nums7 = GetBottomFrequent(allFreq, 6, new List<int>());
+            result.Add(BuildSet("역발상 Cold Top 6 (비출현)", nums7, allFreq, PickBonus(allBonusFreq, nums7), allBonusFreq));
+
+            // Set 8: 홀짝 균형 - 홀수 3개 + 짝수 3개
+            var odd3  = allFreq.Where(x => x.Key % 2 != 0).OrderByDescending(x => x.Value).Take(3).Select(x => x.Key).ToList();
+            var even3 = allFreq.Where(x => x.Key % 2 == 0).OrderByDescending(x => x.Value).Take(3).Select(x => x.Key).ToList();
+            var nums8 = odd3.Concat(even3).OrderBy(x => x).ToList();
+            result.Add(BuildSet("홀짝 균형 (홀 3 + 짝 3)", nums8, allFreq, PickBonus(allBonusFreq, nums8), allBonusFreq));
+
+            // Set 9: 고저 균형 - 1~22 중 3개 + 23~45 중 3개
+            var low3  = allFreq.Where(x => x.Key <= 22).OrderByDescending(x => x.Value).Take(3).Select(x => x.Key).ToList();
+            var high3 = allFreq.Where(x => x.Key >= 23).OrderByDescending(x => x.Value).Take(3).Select(x => x.Key).ToList();
+            var nums9 = low3.Concat(high3).OrderBy(x => x).ToList();
+            result.Add(BuildSet("고저 균형 (1~22 중 3 + 23~45 중 3)", nums9, allFreq, PickBonus(allBonusFreq, nums9), allBonusFreq));
+
+            // Set 10: 빈도 가중 랜덤
+            var nums10 = GetWeightedRandom(allFreq, 6);
+            result.Add(BuildSet("빈도 가중 랜덤", nums10, allFreq, PickBonus(allBonusFreq, nums10), allBonusFreq));
+
+            return result;
+        }
+
+        public WeeklySuggestedViewModel GetWeeklySuggestedViewModel()
+        {
+            var allHistory  = GetLottoHistoryList();
+            var hist52      = GetLottoHistoryList(52);
+            var hist26      = GetLottoHistoryList(26);
+            var hist10      = GetLottoHistoryList(10);
+
+            var ranges = new[]
+            {
+                (name: "1 ~ 9",  min: 1,  max: 9),
+                (name: "10 ~ 19", min: 10, max: 19),
+                (name: "20 ~ 29", min: 20, max: 29),
+                (name: "30 ~ 39", min: 30, max: 39),
+                (name: "40 ~ 45", min: 40, max: 45),
+            };
+
+            var distributions = new List<RangeDistribution>();
+            foreach (var r in ranges)
+            {
+                double allRate  = CalcRangeRate(allHistory, r.min, r.max);
+                double r52Rate  = CalcRangeRate(hist52,    r.min, r.max);
+                double r26Rate  = CalcRangeRate(hist26,    r.min, r.max);
+                double r10Rate  = CalcRangeRate(hist10,    r.min, r.max);
+
+                distributions.Add(new RangeDistribution
+                {
+                    RangeName    = r.name,
+                    RangeMin     = r.min,
+                    RangeMax     = r.max,
+                    AllTimeRate  = allRate,
+                    Recent52Rate = r52Rate,
+                    Recent26Rate = r26Rate,
+                    Recent10Rate = r10Rate,
+                    Gap52        = allRate - r52Rate,
+                    Gap26        = allRate - r26Rate,
+                    Gap10        = allRate - r10Rate,
+                });
+            }
+
+            var allFreq      = GetFrequencyDict(allHistory);
+            var allBonusFreq = GetBonusFrequencyDict(allHistory);
+            var freq52       = GetFrequencyDict(hist52);
+            var bonus52Freq  = GetBonusFrequencyDict(hist52);
+
+            var sets = new List<Target_Numbers>();
+
+            // Set 1: 역대 평균 분포 기반 — 각 구간 비율대로 6개 배분
+            var nums1 = PickByDistribution(distributions.Select(d => (d.RangeMin, d.RangeMax, d.AllTimeRate)).ToList(), allFreq, 6);
+            sets.Add(BuildSet("역대 평균 분포 기반", nums1, allFreq, PickBonus(allBonusFreq, nums1), allBonusFreq));
+
+            // Set 2: 최근 52회 부족 구간 보정 — Gap52 기준
+            var nums2 = PickByGap(distributions, d => d.Gap52, allFreq, 6);
+            sets.Add(BuildSet("최근 52회 부족 구간 보정", nums2, allFreq, PickBonus(allBonusFreq, nums2), allBonusFreq));
+
+            // Set 3: 최근 26회 부족 구간 보정
+            var nums3 = PickByGap(distributions, d => d.Gap26, allFreq, 6);
+            sets.Add(BuildSet("최근 26회 부족 구간 보정", nums3, allFreq, PickBonus(allBonusFreq, nums3), allBonusFreq));
+
+            // Set 4: 최근 10회 부족 구간 보정
+            var nums4 = PickByGap(distributions, d => d.Gap10, allFreq, 6);
+            sets.Add(BuildSet("최근 10회 부족 구간 보정", nums4, allFreq, PickBonus(allBonusFreq, nums4), allBonusFreq));
+
+            // Set 5: 최근 10회 Hot 구간 — 최근에 많이 나온 구간 우선
+            var nums5 = PickByGap(distributions, d => -d.Gap10, allFreq, 6);
+            sets.Add(BuildSet("최근 10회 Hot 구간 집중", nums5, allFreq, PickBonus(allBonusFreq, nums5), allBonusFreq));
+
+            return new WeeklySuggestedViewModel
+            {
+                RangeDistributions = distributions,
+                SuggestedSets      = sets,
+                TotalDraws         = allHistory.Count,
+            };
+        }
+
+        // 구간별 출현 비율 계산
+        private double CalcRangeRate(List<Lotto_History> history, int min, int max)
+        {
+            if (!history.Any()) return 0;
+            int total = history.Count * 6;
+            int count = history.Sum(h =>
+                new[] { h.num1, h.num2, h.num3, h.num4, h.num5, h.num6 }
+                    .Count(n => n >= min && n <= max));
+            return Math.Round((double)count / total * 100, 1);
+        }
+
+        // 역대 평균 분포 비율대로 각 구간에서 번호 배분
+        private List<int> PickByDistribution(List<(int min, int max, double rate)> ranges, Dictionary<int, int> freqDict, int total)
+        {
+            var allocation = AllocateByRate(ranges.Select(r => r.rate).ToList(), total);
+            var selected = new List<int>();
+            for (int i = 0; i < ranges.Count; i++)
+            {
+                int n = allocation[i];
+                if (n <= 0) continue;
+                var candidates = freqDict
+                    .Where(x => x.Key >= ranges[i].min && x.Key <= ranges[i].max && !selected.Contains(x.Key))
+                    .OrderByDescending(x => x.Value)
+                    .Take(n)
+                    .Select(x => x.Key);
+                selected.AddRange(candidates);
+            }
+            return selected.OrderBy(x => x).ToList();
+        }
+
+        // Gap 기준으로 부족한 구간에 더 많이 배분
+        private List<int> PickByGap(List<RangeDistribution> dists, Func<RangeDistribution, double> gapSelector, Dictionary<int, int> freqDict, int total)
+        {
+            // Gap이 클수록(부족할수록) 더 많이 배분 — 역대 비율에 Gap 보정 추가
+            var adjusted = dists.Select(d =>
+            {
+                double rate = Math.Max(0, d.AllTimeRate + gapSelector(d));
+                return (min: d.RangeMin, max: d.RangeMax, rate);
+            }).ToList();
+
+            return PickByDistribution(adjusted, freqDict, total);
+        }
+
+        // 비율 배열 → 정수 배분 (총합 = total 보장)
+        private List<int> AllocateByRate(List<double> rates, int total)
+        {
+            double sum = rates.Sum();
+            var alloc = rates.Select(r => (int)Math.Floor(r / sum * total)).ToList();
+            int remainder = total - alloc.Sum();
+            // 소수점이 큰 구간부터 나머지 배분
+            var order = rates
+                .Select((r, i) => (frac: (r / sum * total) - alloc[i], idx: i))
+                .OrderByDescending(x => x.frac)
+                .Select(x => x.idx)
+                .ToList();
+            for (int i = 0; i < remainder; i++)
+                alloc[order[i]]++;
+            return alloc;
+        }
+
+        private Dictionary<int, int> GetFrequencyDict(List<Lotto_History> history)
+        {
+            int[] counts = lottoCore.GetTotalCounts(history);
+            return lottoCore.BuildDictionary(counts);
+        }
+
+        private Dictionary<int, int> GetBonusFrequencyDict(List<Lotto_History> history)
+        {
+            int[] counts = lottoCore.GetTotalBonusCounts(history);
+            return lottoCore.BuildDictionary(counts);
+        }
+
+        private int PickBonus(Dictionary<int, int> bonusFreq, List<int> exclude)
+        {
+            var bonus = bonusFreq.Where(x => !exclude.Contains(x.Key))
+                                 .OrderByDescending(x => x.Value)
+                                 .FirstOrDefault();
+            return bonus.Key;
+        }
+
+        private List<int> GetTopFrequent(Dictionary<int, int> freqDict, int n)
+        {
+            return freqDict.OrderByDescending(x => x.Value).Take(n).Select(x => x.Key).OrderBy(x => x).ToList();
+        }
+
+        private List<int> GetBottomFrequent(Dictionary<int, int> freqDict, int n, List<int> exclude)
+        {
+            return freqDict.Where(x => !exclude.Contains(x.Key)).OrderBy(x => x.Value).Take(n).Select(x => x.Key).OrderBy(x => x).ToList();
+        }
+
+        private List<int> GetWeightedRandom(Dictionary<int, int> freqDict, int n)
+        {
+            var rng = new Random();
+            int total = freqDict.Values.Sum();
+            var numbers = freqDict.Keys.ToList();
+            var weights = freqDict.Values.ToList();
+            var selected = new HashSet<int>();
+
+            while (selected.Count < n)
+            {
+                int r = rng.Next(total);
+                int cumulative = 0;
+                for (int i = 0; i < numbers.Count; i++)
+                {
+                    cumulative += weights[i];
+                    if (r < cumulative)
+                    {
+                        selected.Add(numbers[i]);
+                        break;
+                    }
+                }
+            }
+            return selected.OrderBy(x => x).ToList();
+        }
+
+        private Target_Numbers BuildSet(string label, List<int> numbers, Dictionary<int, int> freqDict, int bonus, Dictionary<int, int> bonusFreqDict)
+        {
+            var sorted = numbers.OrderBy(x => x).ToList();
+            while (sorted.Count < 6) sorted.Add(0);
+            return new Target_Numbers
+            {
+                setLabel = label,
+                targetNumber1 = sorted[0], targetNumberCount1 = freqDict.ContainsKey(sorted[0]) ? freqDict[sorted[0]] : 0,
+                targetNumber2 = sorted[1], targetNumberCount2 = freqDict.ContainsKey(sorted[1]) ? freqDict[sorted[1]] : 0,
+                targetNumber3 = sorted[2], targetNumberCount3 = freqDict.ContainsKey(sorted[2]) ? freqDict[sorted[2]] : 0,
+                targetNumber4 = sorted[3], targetNumberCount4 = freqDict.ContainsKey(sorted[3]) ? freqDict[sorted[3]] : 0,
+                targetNumber5 = sorted[4], targetNumberCount5 = freqDict.ContainsKey(sorted[4]) ? freqDict[sorted[4]] : 0,
+                targetNumber6 = sorted[5], targetNumberCount6 = freqDict.ContainsKey(sorted[5]) ? freqDict[sorted[5]] : 0,
+                targetNumber7 = bonus,     targetNumberCount7 = bonusFreqDict.ContainsKey(bonus) ? bonusFreqDict[bonus] : 0,
+            };
+        }
+
+        #endregion
 
         #region 사용안하는 코드
         public string GetGetPosNum()

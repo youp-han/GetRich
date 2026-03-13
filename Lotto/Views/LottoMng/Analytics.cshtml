@@ -1,76 +1,41 @@
-﻿
-@using Microsoft.Ajax.Utilities
-@model IEnumerable<Lotto.Models.Numbers_NCounts>
+@model IEnumerable<Lotto.Models.Target_Numbers>
 @{
-    ViewBag.Title = "LottoTop";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Analytics</h2>
+<h2>@ViewBag.pageTitle</h2>
+<p class="text-muted">@ViewBag.subTitle</p>
 
-<body>
-
-<div>
-    Number Counting in Total
-</div>
-<div>
-    <table id="example-table-1" width="100%" class="table table-striped table-bordered table-hover">
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
         <thead>
-        <tr>
-
-            <th>
-                @Html.DisplayNameFor(model => model.ID)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.numbers)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.nCounts)
-            </th>
-        </tr>
+            <tr>
+                <th style="min-width:240px">@ViewBag.colStrategy</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+                <th>6</th>
+                <th>@ViewBag.colBonus</th>
+            </tr>
         </thead>
         <tbody>
-             
         @foreach (var item in Model)
         {
             <tr>
-                      
-
-                <td>
-                    @Html.DisplayFor(modelItem => item.numbers)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.numbers)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.nCounts)
-                </td>
-
-                       
+                <td><strong>@item.setLabel</strong></td>
+                <td>@item.targetNumber1 <small class="text-muted">(@item.targetNumberCount1)</small></td>
+                <td>@item.targetNumber2 <small class="text-muted">(@item.targetNumberCount2)</small></td>
+                <td>@item.targetNumber3 <small class="text-muted">(@item.targetNumberCount3)</small></td>
+                <td>@item.targetNumber4 <small class="text-muted">(@item.targetNumberCount4)</small></td>
+                <td>@item.targetNumber5 <small class="text-muted">(@item.targetNumberCount5)</small></td>
+                <td>@item.targetNumber6 <small class="text-muted">(@item.targetNumberCount6)</small></td>
+                <td><strong>@item.targetNumber7</strong> <small class="text-muted">(@item.targetNumberCount7)</small></td>
             </tr>
-                
-
         }
-
         </tbody>
     </table>
 </div>
 
-    
-</body>
-
-<script type="text/javascript">
-
-            
-
-    $(document).ready(function () {
-        $("#example-table-1").DataTable({
-            "order": [[0, "asc"]],
-            "lengthMenu": [[-1], [ "All"]]
-
-        });
-
-            
-    });
-
-</script>
+<p class="text-muted"><small>@ViewBag.footerNote</small></p>

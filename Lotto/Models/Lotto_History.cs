@@ -79,6 +79,7 @@ namespace Lotto.Models
 
     public class Target_Numbers
     {
+        public string setLabel { get; set; }
         public int targetNumber1 { get; set; }
         public int targetNumberCount1 { get; set; }
         public int targetNumber2 { get; set; }
@@ -93,5 +94,26 @@ namespace Lotto.Models
         public int targetNumberCount6 { get; set; }
         public int targetNumber7 { get; set; }
         public int targetNumberCount7 { get; set; }
+    }
+
+    public class RangeDistribution
+    {
+        public string RangeName { get; set; }
+        public int RangeMin { get; set; }
+        public int RangeMax { get; set; }
+        public double AllTimeRate { get; set; }
+        public double Recent52Rate { get; set; }
+        public double Recent26Rate { get; set; }
+        public double Recent10Rate { get; set; }
+        public double Gap52 { get; set; }
+        public double Gap26 { get; set; }
+        public double Gap10 { get; set; }
+    }
+
+    public class WeeklySuggestedViewModel
+    {
+        public List<RangeDistribution> RangeDistributions { get; set; }
+        public List<Target_Numbers> SuggestedSets { get; set; }
+        public int TotalDraws { get; set; }
     }
 }

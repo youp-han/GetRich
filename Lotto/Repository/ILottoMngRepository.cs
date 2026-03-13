@@ -19,7 +19,8 @@ namespace Lotto.Repository
         List<Numbers_NCounts> ConvertDictionaryToList(Dictionary<int, int> convertedSource);
 
         List<Target_Numbers> GetTotalCountByPlace(int topCount);
-
+        List<Target_Numbers> GetWeeklySuggestedNumbers();
+        WeeklySuggestedViewModel GetWeeklySuggestedViewModel();
 
     }
 }

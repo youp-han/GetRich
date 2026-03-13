@@ -15,10 +15,12 @@ namespace Lotto.Core
             try
             {
                 
-                WebRequest request = WebRequest.Create(Url);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url);
 
-                request.Method = "POST";
-                request.ContentType = "application/json";
+                request.Method = "GET";
+                request.Accept = "application/json";
+                request.Headers.Add("Accept-Language", "ko-KR,ko;q=0.9");
+                //request.ContentType = "application/json";
 
                 //ignore SSL
                 ServicePointManager.ServerCertificateValidationCallback = delegate (
@@ -31,11 +33,8 @@ namespace Lotto.Core
                 //ignore SSL End
 
 
-                Stream dataStream = request.GetRequestStream();
-                dataStream.Close();
-
                 WebResponse response = request.GetResponse();
-                dataStream = response.GetResponseStream();
+                Stream dataStream = response.GetResponseStream();
                 StreamReader reader = new StreamReader(dataStream);
                 result = reader.ReadToEnd();
                 reader.Close();
