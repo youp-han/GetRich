@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace Lotto.Models
@@ -101,6 +102,15 @@ namespace Lotto.Models
         public string RangeName { get; set; }
         public int RangeMin { get; set; }
         public int RangeMax { get; set; }
+        // 위치별 비율: 해당 구간 번호가 각 자리에 나온 비율
+        public double Pos1Rate { get; set; }
+        public double Pos2Rate { get; set; }
+        public double Pos3Rate { get; set; }
+        public double Pos4Rate { get; set; }
+        public double Pos5Rate { get; set; }
+        public double Pos6Rate { get; set; }
+        public double BonusRate { get; set; }
+        // 전체 빈도 (추천 로직용)
         public double AllTimeRate { get; set; }
         public double Recent52Rate { get; set; }
         public double Recent26Rate { get; set; }
@@ -113,7 +123,8 @@ namespace Lotto.Models
     public class WeeklySuggestedViewModel
     {
         public List<RangeDistribution> RangeDistributions { get; set; }
-        public List<Target_Numbers> SuggestedSets { get; set; }
+        public List<Target_Numbers> SuggestedSets { get; set; }   // 분포 기반 최대 빈도
+        public List<Target_Numbers> OverdueSets { get; set; }     // 분포 기반 오버듀 (다음 나올 법한)
         public int TotalDraws { get; set; }
     }
 }

@@ -46,7 +46,23 @@ namespace Lotto.Controllers
 
         public ActionResult WeeklySuggestedNumbers()
         {
+            ViewBag.SecDist  = "구간별 자리 분포 비교 (역대 전체)";
+            ViewBag.SecSets  = "분포 기반 최대 빈도 번호";
+            ViewBag.ColRange = "구간";
+            ViewBag.ColPos1  = "1번째";
+            ViewBag.ColPos2  = "2번째";
+            ViewBag.ColPos3  = "3번째";
+            ViewBag.ColPos4  = "4번째";
+            ViewBag.ColPos5  = "5번째";
+            ViewBag.ColPos6  = "6번째";
+            ViewBag.ColBonus = "+ 보너스";
+            ViewBag.ColStrat = "전략";
+            ViewBag.Note1    = "각 구간의 번호가 해당 자리에 당첨된 비율 (역대 전체 기준).";
+            ViewBag.SecOverdue = "다음 나올 법한 번호 (트렌드 구간 내 오버듀)";
+            ViewBag.NoteOverdue = "각 자리별 최근 트렌드 구간 안에서, 가장 오랫동안 나오지 않은 번호를 선택합니다. 괄호 안 숫자는 마지막 출현(보너스는 보너스 출현) 이후 경과 회차 수. 역대 당첨 조합과 중복 시 자동 교체됩니다.";
+            ViewBag.Note2    = "괄호 안 숫자는 역대 전체 출현 횟수.";
             WeeklySuggestedViewModel vm = lottoMngRepository.GetWeeklySuggestedViewModel();
+            ViewBag.SubTitle = "총 " + vm.TotalDraws + " 회차 데이터 기반";
             return View(vm);
         }
 

@@ -420,6 +420,13 @@ namespace Lotto.Repository
                     RangeName    = r.name,
                     RangeMin     = r.min,
                     RangeMax     = r.max,
+                    Pos1Rate     = CalcPositionRate(allHistory, r.min, r.max, h => h.num1),
+                    Pos2Rate     = CalcPositionRate(allHistory, r.min, r.max, h => h.num2),
+                    Pos3Rate     = CalcPositionRate(allHistory, r.min, r.max, h => h.num3),
+                    Pos4Rate     = CalcPositionRate(allHistory, r.min, r.max, h => h.num4),
+                    Pos5Rate     = CalcPositionRate(allHistory, r.min, r.max, h => h.num5),
+                    Pos6Rate     = CalcPositionRate(allHistory, r.min, r.max, h => h.num6),
+                    BonusRate    = CalcPositionRate(allHistory, r.min, r.max, h => h.bonus),
                     AllTimeRate  = allRate,
                     Recent52Rate = r52Rate,
                     Recent26Rate = r26Rate,
@@ -432,40 +439,68 @@ namespace Lotto.Repository
 
             var allFreq      = GetFrequencyDict(allHistory);
             var allBonusFreq = GetBonusFrequencyDict(allHistory);
-            var freq52       = GetFrequencyDict(hist52);
             var bonus52Freq  = GetBonusFrequencyDict(hist52);
+            var bonus26Freq  = GetBonusFrequencyDict(hist26);
+            var bonus10Freq  = GetBonusFrequencyDict(hist10);
 
+            var rangeList = ranges.Select(r => (r.min, r.max)).ToList();
             var sets = new List<Target_Numbers>();
 
-            // Set 1: 역대 평균 분포 기반 — 각 구간 비율대로 6개 배분
-            var nums1 = PickByDistribution(distributions.Select(d => (d.RangeMin, d.RangeMax, d.AllTimeRate)).ToList(), allFreq, 6);
-            sets.Add(BuildSet("역대 평균 분포 기반", nums1, allFreq, PickBonus(allBonusFreq, nums1), allBonusFreq));
+            // Set 1: 최근 10회 자리별 트렌드
+            var nums1 = PickByPositionalTrend(hist10, allFreq, rangeList);
+            sets.Add(BuildSet("최근 10회 자리별 트렌드", nums1, allFreq, PickBonus(bonus10Freq, nums1), bonus10Freq));
 
-            // Set 2: 최근 52회 부족 구간 보정 — Gap52 기준
-            var nums2 = PickByGap(distributions, d => d.Gap52, allFreq, 6);
-            sets.Add(BuildSet("최근 52회 부족 구간 보정", nums2, allFreq, PickBonus(allBonusFreq, nums2), allBonusFreq));
+            // Set 2: 최근 26회 자리별 트렌드
+            var nums2 = PickByPositionalTrend(hist26, allFreq, rangeList);
+            sets.Add(BuildSet("최근 26회 자리별 트렌드", nums2, allFreq, PickBonus(bonus26Freq, nums2), bonus26Freq));
 
-            // Set 3: 최근 26회 부족 구간 보정
-            var nums3 = PickByGap(distributions, d => d.Gap26, allFreq, 6);
-            sets.Add(BuildSet("최근 26회 부족 구간 보정", nums3, allFreq, PickBonus(allBonusFreq, nums3), allBonusFreq));
+            // Set 3: 최근 52회 자리별 트렌드
+            var nums3 = PickByPositionalTrend(hist52, allFreq, rangeList);
+            sets.Add(BuildSet("최근 52회 자리별 트렌드", nums3, allFreq, PickBonus(bonus52Freq, nums3), bonus52Freq));
 
-            // Set 4: 최근 10회 부족 구간 보정
-            var nums4 = PickByGap(distributions, d => d.Gap10, allFreq, 6);
-            sets.Add(BuildSet("최근 10회 부족 구간 보정", nums4, allFreq, PickBonus(allBonusFreq, nums4), allBonusFreq));
+            // Set 4: 역대 전체 자리별 트렌드
+            var nums4 = PickByPositionalTrend(allHistory, allFreq, rangeList);
+            sets.Add(BuildSet("역대 전체 자리별 트렌드", nums4, allFreq, PickBonus(allBonusFreq, nums4), allBonusFreq));
 
-            // Set 5: 최근 10회 Hot 구간 — 최근에 많이 나온 구간 우선
-            var nums5 = PickByGap(distributions, d => -d.Gap10, allFreq, 6);
-            sets.Add(BuildSet("최근 10회 Hot 구간 집중", nums5, allFreq, PickBonus(allBonusFreq, nums5), allBonusFreq));
+            // Set 5: 최근 10회 역발상 — 각 자리에서 가장 덜 나온 구간 선택
+            var nums5 = PickByPositionalTrend(hist10, allFreq, rangeList, reverse: true);
+            sets.Add(BuildSet("최근 10회 역발상 (오버듀)", nums5, allFreq, PickBonus(bonus10Freq, nums5), bonus10Freq));
+
+            // 오버듀 세트 — 자리별 트렌딩 구간 내 가장 오래 안 나온 번호
+            var drawsAgo     = GetDrawsSinceLastAppearance(allHistory);
+            var bonusDrawsAgo = GetBonusDrawsSinceLastAppearance(allHistory);
+            var overdueSets  = new List<Target_Numbers>();
+
+            var od1a = EnsureNotHistorical(PickByPositionalTrendOverdue(hist10, drawsAgo, rangeList), drawsAgo, allHistory);
+            overdueSets.Add(BuildSet("최근 10회 트렌드 + 오버듀 A", od1a, drawsAgo, PickBonus(bonusDrawsAgo, od1a), bonusDrawsAgo));
+            var od1b = EnsureNotHistorical(PickByPositionalTrendOverdue(hist10, drawsAgo, rangeList, od1a), drawsAgo, allHistory, od1a);
+            overdueSets.Add(BuildSet("최근 10회 트렌드 + 오버듀 B", od1b, drawsAgo, PickBonus(bonusDrawsAgo, od1a.Concat(od1b).ToList()), bonusDrawsAgo));
+
+            var od2a = EnsureNotHistorical(PickByPositionalTrendOverdue(hist26, drawsAgo, rangeList), drawsAgo, allHistory);
+            overdueSets.Add(BuildSet("최근 26회 트렌드 + 오버듀 A", od2a, drawsAgo, PickBonus(bonusDrawsAgo, od2a), bonusDrawsAgo));
+            var od2b = EnsureNotHistorical(PickByPositionalTrendOverdue(hist26, drawsAgo, rangeList, od2a), drawsAgo, allHistory, od2a);
+            overdueSets.Add(BuildSet("최근 26회 트렌드 + 오버듀 B", od2b, drawsAgo, PickBonus(bonusDrawsAgo, od2a.Concat(od2b).ToList()), bonusDrawsAgo));
+
+            var od3a = EnsureNotHistorical(PickByPositionalTrendOverdue(hist52, drawsAgo, rangeList), drawsAgo, allHistory);
+            overdueSets.Add(BuildSet("최근 52회 트렌드 + 오버듀 A", od3a, drawsAgo, PickBonus(bonusDrawsAgo, od3a), bonusDrawsAgo));
+            var od3b = EnsureNotHistorical(PickByPositionalTrendOverdue(hist52, drawsAgo, rangeList, od3a), drawsAgo, allHistory, od3a);
+            overdueSets.Add(BuildSet("최근 52회 트렌드 + 오버듀 B", od3b, drawsAgo, PickBonus(bonusDrawsAgo, od3a.Concat(od3b).ToList()), bonusDrawsAgo));
+
+            var od4a = EnsureNotHistorical(PickByPositionalTrendOverdue(allHistory, drawsAgo, rangeList), drawsAgo, allHistory);
+            overdueSets.Add(BuildSet("역대 전체 트렌드 + 오버듀 A", od4a, drawsAgo, PickBonus(bonusDrawsAgo, od4a), bonusDrawsAgo));
+            var od4b = EnsureNotHistorical(PickByPositionalTrendOverdue(allHistory, drawsAgo, rangeList, od4a), drawsAgo, allHistory, od4a);
+            overdueSets.Add(BuildSet("역대 전체 트렌드 + 오버듀 B", od4b, drawsAgo, PickBonus(bonusDrawsAgo, od4a.Concat(od4b).ToList()), bonusDrawsAgo));
 
             return new WeeklySuggestedViewModel
             {
                 RangeDistributions = distributions,
                 SuggestedSets      = sets,
+                OverdueSets        = overdueSets,
                 TotalDraws         = allHistory.Count,
             };
         }
 
-        // 구간별 출현 비율 계산
+        // 구간별 전체 출현 비율 계산 (6개 번호 기준)
         private double CalcRangeRate(List<Lotto_History> history, int min, int max)
         {
             if (!history.Any()) return 0;
@@ -474,6 +509,176 @@ namespace Lotto.Repository
                 new[] { h.num1, h.num2, h.num3, h.num4, h.num5, h.num6 }
                     .Count(n => n >= min && n <= max));
             return Math.Round((double)count / total * 100, 1);
+        }
+
+        // 특정 자리(selector)에서 구간[min,max]에 속하는 비율
+        private double CalcPositionRate(List<Lotto_History> history, int min, int max, Func<Lotto_History, int> selector)
+        {
+            if (!history.Any()) return 0;
+            int count = history.Count(h => selector(h) >= min && selector(h) <= max);
+            return Math.Round((double)count / history.Count * 100, 1);
+        }
+
+        // 각 번호(1~45)의 마지막 출현 이후 경과 회차 계산
+        // history는 최신순(DESC) 정렬되어야 함
+        private Dictionary<int, int> GetDrawsSinceLastAppearance(List<Lotto_History> history)
+        {
+            var result = new Dictionary<int, int>();
+            var sortedDesc = history.OrderByDescending(h => h.seqNo).ToList();
+
+            for (int num = 1; num <= 45; num++)
+            {
+                int idx = sortedDesc.FindIndex(h =>
+                    h.num1 == num || h.num2 == num || h.num3 == num ||
+                    h.num4 == num || h.num5 == num || h.num6 == num);
+
+                // 한 번도 안 나온 번호는 전체 회차 수로
+                result[num] = idx == -1 ? sortedDesc.Count : idx;
+            }
+            return result;
+        }
+
+        // 보너스 번호(1~45)의 마지막 보너스 출현 이후 경과 회차 계산
+        private Dictionary<int, int> GetBonusDrawsSinceLastAppearance(List<Lotto_History> history)
+        {
+            var result = new Dictionary<int, int>();
+            var sortedDesc = history.OrderByDescending(h => h.seqNo).ToList();
+
+            for (int num = 1; num <= 45; num++)
+            {
+                int idx = sortedDesc.FindIndex(h => h.bonus == num);
+                result[num] = idx == -1 ? sortedDesc.Count : idx;
+            }
+            return result;
+        }
+
+        // 생성된 6개 번호가 역대 당첨 이력과 동일한지 확인
+        private bool IsHistoricalDuplicate(List<int> numbers, List<Lotto_History> history)
+        {
+            var set = new HashSet<int>(numbers);
+            return history.Any(h =>
+                new HashSet<int> { h.num1, h.num2, h.num3, h.num4, h.num5, h.num6 }.SetEquals(set));
+        }
+
+        // 역대 당첨 이력과 동일한 경우 가장 덜 오버듀한 번호를 교체
+        private List<int> EnsureNotHistorical(List<int> numbers, Dictionary<int, int> drawsAgo,
+            List<Lotto_History> allHistory, List<int> additionalExclude = null)
+        {
+            var set = new List<int>(numbers);
+            var excluded = additionalExclude != null ? new List<int>(additionalExclude) : new List<int>();
+
+            while (IsHistoricalDuplicate(set, allHistory))
+            {
+                // 세트 안에서 가장 덜 오버듀한 번호(가장 최근에 나온 번호)를 교체 대상으로
+                var leastOverdue = set.OrderBy(n => drawsAgo.ContainsKey(n) ? drawsAgo[n] : 0).First();
+                set.Remove(leastOverdue);
+                excluded.Add(leastOverdue);
+
+                var replacement = drawsAgo
+                    .Where(x => !set.Contains(x.Key) && !excluded.Contains(x.Key))
+                    .OrderByDescending(x => x.Value)
+                    .FirstOrDefault();
+
+                if (replacement.Key == 0) break; // 대체 번호 없으면 중단
+                set.Add(replacement.Key);
+            }
+
+            return set.OrderBy(x => x).ToList();
+        }
+
+        // 자리별 트렌딩 구간 + 구간 내 오버듀 번호 선택
+        // excludeNumbers: 이미 다른 세트에서 사용된 번호 (B세트 생성 시 A세트 번호 전달)
+        private List<int> PickByPositionalTrendOverdue(List<Lotto_History> trendHistory,
+            Dictionary<int, int> drawsAgo, List<(int min, int max)> ranges,
+            List<int> excludeNumbers = null)
+        {
+            var posSelectors = new Func<Lotto_History, int>[]
+            {
+                h => h.num1, h => h.num2, h => h.num3,
+                h => h.num4, h => h.num5, h => h.num6
+            };
+
+            var excluded = excludeNumbers ?? new List<int>();
+            var selected = new List<int>();
+
+            for (int p = 0; p < posSelectors.Length; p++)
+            {
+                // 이 자리에서 가장 트렌딩한 구간
+                var bestRange = ranges
+                    .OrderByDescending(r => CalcPositionRate(trendHistory, r.min, r.max, posSelectors[p]))
+                    .First();
+
+                // 그 구간에서 가장 오래 안 나온 번호 (세트 내 중복 + 이전 세트 번호 제외)
+                var candidate = drawsAgo
+                    .Where(x => x.Key >= bestRange.min && x.Key <= bestRange.max
+                             && !selected.Contains(x.Key) && !excluded.Contains(x.Key))
+                    .OrderByDescending(x => x.Value)
+                    .FirstOrDefault();
+
+                if (candidate.Key != 0)
+                    selected.Add(candidate.Key);
+                else
+                {
+                    // 구간 소진 시 전체에서 가장 오래 안 나온 번호 (이전 세트 번호 제외)
+                    var fallback = drawsAgo
+                        .Where(x => !selected.Contains(x.Key) && !excluded.Contains(x.Key))
+                        .OrderByDescending(x => x.Value)
+                        .FirstOrDefault();
+                    if (fallback.Key != 0)
+                        selected.Add(fallback.Key);
+                }
+            }
+
+            return selected.OrderBy(x => x).ToList();
+        }
+
+        // 각 자리(1~6)별로 주어진 history에서 가장 많이(또는 적게) 나온 구간을 찾아 번호 선택
+        private List<int> PickByPositionalTrend(List<Lotto_History> history, Dictionary<int, int> freqDict,
+            List<(int min, int max)> ranges, bool reverse = false)
+        {
+            var posSelectors = new Func<Lotto_History, int>[]
+            {
+                h => h.num1, h => h.num2, h => h.num3,
+                h => h.num4, h => h.num5, h => h.num6
+            };
+
+            var selected = new List<int>();
+
+            for (int p = 0; p < posSelectors.Length; p++)
+            {
+                // 각 구간의 이 자리 출현 비율 계산
+                var rangeRates = ranges.Select(r => new
+                {
+                    r.min, r.max,
+                    rate = CalcPositionRate(history, r.min, r.max, posSelectors[p])
+                });
+
+                // reverse=true면 가장 덜 나온 구간(오버듀), false면 가장 많이 나온 구간
+                var bestRange = reverse
+                    ? rangeRates.OrderBy(r => r.rate).First()
+                    : rangeRates.OrderByDescending(r => r.rate).First();
+
+                // 해당 구간에서 역대 빈도 1위 번호 선택 (중복 제외)
+                var candidate = freqDict
+                    .Where(x => x.Key >= bestRange.min && x.Key <= bestRange.max && !selected.Contains(x.Key))
+                    .OrderByDescending(x => x.Value)
+                    .FirstOrDefault();
+
+                if (candidate.Key != 0)
+                    selected.Add(candidate.Key);
+                else
+                {
+                    // 해당 구간 번호가 모두 소진되면 전체에서 빈도 1위 선택
+                    var fallback = freqDict
+                        .Where(x => !selected.Contains(x.Key))
+                        .OrderByDescending(x => x.Value)
+                        .FirstOrDefault();
+                    if (fallback.Key != 0)
+                        selected.Add(fallback.Key);
+                }
+            }
+
+            return selected.OrderBy(x => x).ToList();
         }
 
         // 역대 평균 분포 비율대로 각 구간에서 번호 배분
@@ -496,12 +701,12 @@ namespace Lotto.Repository
         }
 
         // Gap 기준으로 부족한 구간에 더 많이 배분
+        // Gap이 작으면 정수 배분이 바뀌지 않으므로 5배 가중치 적용
         private List<int> PickByGap(List<RangeDistribution> dists, Func<RangeDistribution, double> gapSelector, Dictionary<int, int> freqDict, int total)
         {
-            // Gap이 클수록(부족할수록) 더 많이 배분 — 역대 비율에 Gap 보정 추가
             var adjusted = dists.Select(d =>
             {
-                double rate = Math.Max(0, d.AllTimeRate + gapSelector(d));
+                double rate = Math.Max(0.5, d.AllTimeRate + gapSelector(d) * 5);
                 return (min: d.RangeMin, max: d.RangeMax, rate);
             }).ToList();
 
